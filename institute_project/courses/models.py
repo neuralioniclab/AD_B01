@@ -1,4 +1,6 @@
 from django.db import models
+from teachers.models import TeacherModel
+from students.models import StudentModel
 from users_auth.models import UserModel
 
 class CourseCategoryModel(models.Model):
@@ -24,4 +26,31 @@ class CourseModel(models.Model):
     
     def __str__(self):
         return f'{self.title}'
+
+
+class CourseEnrollmentModel(models.Model):
+    student = models.ForeignKey(StudentModel, on_delete=models.SET_NULL, null=True, related_name='student_enrollment')
+    course = models.ForeignKey(CourseModel, on_delete=models.CASCADE, null=True)
+    admission_fee = models.FloatField(null=True)
+    pay = models.FloatField(null=True)
+    due = models.FloatField(null=True)
     
+    
+    def __str__(self):
+        return f'{self.student.name}'
+    
+    # def save(self, *args, **kwargs):
+    #     self.admission_fee = self.course.course_fee
+    #     self.due = self.admission_fee - self.pay
+    #     super().save(*args, **kwargs)
+        
+
+class AssignTeacherModel(models.Model):
+    teacher = models.ForeignKey(TeacherModel, on_delete= models.SET_NULL, related_name='assign_course', null=True)
+    course = models.ForeignKey(
+        CourseModel,
+        on_delete=models.CASCADE,
+        null=True
+    )
+    def __str__(self):
+        return f'{self.teacher.name}-{self.course.title}'
