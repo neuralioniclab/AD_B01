@@ -1,0 +1,51 @@
+{% extends 'master/base.html' %}
+
+{% block title %}
+    Course Enrollment List
+{% endblock title %}
+    
+
+{% block body %}
+    <h1>Course Enrollment List</h1>
+    {% if request.user.user_type == 'Admin' %}
+    <a href="{% url 'enroll_new_student' %}" class="btn btn-success">Enroll New Student</a>
+    {% endif %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>SL</th>
+                <th>Student Name</th>
+                <th>Course Name</th>
+                <th>Course Fee</th>
+                <th>Pay</th>
+                <th>Due</th>
+                {% if request.user.user_type == 'Admin' %}
+                <th>Action</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            
+            {% for data in enrolled_ata %}
+            <tr>
+                <td>{{forloop.counter}}</td>
+                <td>{{data.student.name}}</td>
+                <td>{{data.course.title}}</td>
+                <td>{{data.admission_fee}}</td>
+                <td>{{data.pay}}</td>
+                <td>{{data.due}}</td>
+                {% if request.user.user_type == 'Admin' %}
+                <td>
+                    <a href="{% url 'edit_category' data.id %}" class="btn btn-primary">Edit</a>
+                    <a href="{% url 'delete_category' data.id %}" class="btn btn-danger">Delete</a>
+                </td>
+                {% endif %}
+            </tr>
+                
+            {% endfor %}
+                
+        </tbody>
+
+    </table>
+{% endblock body %}
+    

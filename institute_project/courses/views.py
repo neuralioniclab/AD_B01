@@ -100,3 +100,68 @@ def edit_course(request, id):
 def delete_course(request, id):
     CourseModel.objects.get(id = id).delete()
     return redirect('course_list')
+
+
+def course_enroll_list(request):
+    if request.user.user_type == 'Admin':
+        enrolled_data = CourseEnrollmentModel.objects.all()
+    else:
+        
+        enrolled_data = CourseEnrollmentModel.objects.filter(student=request.user.student_profile)
+    context = {
+        'enrolled_ata' : enrolled_data
+    }
+    
+    return render(request, 'course-enroll-list.html', context)
+
+def enroll_new_student(request):
+    form_data = EnrollStudentForm()
+    if request.method == 'POST':
+        form_data = EnrollStudentForm(request.POST)
+        if form_data.is_valid():
+            enroll_from = form_data.save(commit=False)
+            enroll_from.admission_fee = enroll_from.course.course_fee
+            enroll_from.due = enroll_from.course.course_fee - enroll_from.pay
+            enroll_from.save()
+            
+            return redirect('course_enroll_list')
+    
+    context = {
+        'form_title': 'Enroll New Student Info',
+        'form_btn': 'Enroll New Student ',
+        'page_title': 'Enroll New Student',
+        'form_data': form_data
+    }
+    
+    
+    return render(request, 'master/base-form.html', context)
+
+
+def assign_teacher_list(request):
+    if request.user.user_type == 'Admin':
+        assigned_data = AssignTeacherModel.objects.all()
+    else:
+        assigned_data = AssignTeacherModel.objects.filter(teacher = request.user.teacher_profile)
+    context = {
+        'assigned_data' : assigned_data
+    }
+    
+    return render(request, 'assign-teacher-list.html', context)
+
+def assign_teacher(request):
+    form_data = AssignTeacherForm()
+    if request.method == 'POST':
+        form_data = AssignTeacherForm(request.POST)
+        if form_data.is_valid():
+            form_data.save()
+            return redirect('assign_teacher_list')
+    
+    context = {
+        'form_title': 'Assign Teacher Info',
+        'form_btn': 'Assign Teacher ',
+        'page_title': 'Assign Teacher',
+        'form_data': form_data
+    }
+    
+    
+    return render(request, 'master/base-form.html', context)
