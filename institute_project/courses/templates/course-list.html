@@ -7,13 +7,17 @@
 
 {% block body %}
     <h1>Course List</h1>
+    {% if request.user.user_type == 'Admin' %}
     <a href="{% url 'add_course' %}" class="btn btn-success">Add Course</a>
+    {% endif %}
     <table class="table table-striped">
         <thead>
             <tr>
                 <th>SL</th>
                 <th>Title</th>
+                {% if request.user.user_type == 'Admin' %}
                 <th>Action</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -22,10 +26,15 @@
             <tr>
                 <td>{{forloop.counter}}</td>
                 <td>{{data.title}}</td>
+                
+                {% if request.user.user_type == 'Admin' %}
                 <td>
                     <a href="{% url 'edit_course' data.id %}" class="btn btn-primary">Edit</a>
                     <a href="{% url 'delete_course' data.id %}" class="btn btn-danger">Delete</a>
                 </td>
+                    
+                {% endif %}
+                    
             </tr>
                 
             {% endfor %}

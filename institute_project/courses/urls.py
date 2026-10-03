@@ -12,5 +12,12 @@ urlpatterns = [
     path('course-list/',course_list, name='course_list'),
     path('add_course/',add_course, name='add_course'),
     path('edit_course/<str:id>/',edit_course, name='edit_course'),
-    path('delete-course/<str:id>/',delete_course, name='delete_course')
+    path('delete-course/<str:id>/',delete_course, name='delete_course'),
+    
+    #---Enrollment
+    path('course-enroll-list/',course_enroll_list, name='course_enroll_list'),
+    path('enroll-new-student/',enroll_new_student, name='enroll_new_student'),
+    
+    path('assign-teacher-list/',assign_teacher_list, name='assign_teacher_list'),
+    path('assign_teacher/', assign_teacher, name='assign_teacher'),
 ]
