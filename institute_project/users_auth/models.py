@@ -20,18 +20,3 @@ class BasicInfoModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     
-
-    
-    
-class TeacherModel(BasicInfoModel):
-    user = models.OneToOneField(
-        UserModel,
-        on_delete=models.CASCADE,
-        related_name='teacher_profile',
-        null=True
-    )
-    joining_date = models.DateField(null=True)
-    image = models.ImageField(upload_to='media/teacher_img', null=True)
-    
-    def __str__(self):
-            return f'{self.user.username}'
