@@ -3,11 +3,11 @@
 {% block title %}
     Assign Teacher List
 {% endblock title %}
-    
+
 
 {% block body %}
     <h1>Assign Teacher List</h1>
-    {% if request.user.user_type == 'Admin' %}
+    {% if request.user.user_type == 'Admin' or request.user.is_superuser %}
     <a href="{% url 'assign_teacher' %}" class="btn btn-success">Assign Teacher</a>
     {% endif %}
     <table class="table table-striped">
@@ -16,31 +16,31 @@
                 <th>SL</th>
                 <th>Teacher Name</th>
                 <th>Course Name</th>
-                {% if request.user.user_type == 'Admin' %}
+                {% if request.user.user_type == 'Admin' or request.user.is_superuser %}
                 <th>Action</th>
                 {% endif %}
             </tr>
         </thead>
         <tbody>
-            
+
             {% for data in assigned_data %}
             <tr>
                 <td>{{forloop.counter}}</td>
                 <td>{{data.teacher.name}}</td>
                 <td>{{data.course.title}}</td>
-    
-                {% if request.user.user_type == 'Admin' %}
+
+                {% if request.user.user_type == 'Admin' or request.user.is_superuser %}
                 <td>
-                    <a href="{% url 'edit_category' data.id %}" class="btn btn-primary">Edit</a>
-                    <a href="{% url 'delete_category' data.id %}" class="btn btn-danger">Delete</a>
+                    <a href="{% url 'edit_assignment' data.id %}" class="btn btn-primary">Edit</a>
+                    <a href="{% url 'delete_assignment' data.id %}" class="btn btn-danger">Delete</a>
                 </td>
                 {% endif %}
             </tr>
-                
+
             {% endfor %}
-                
+
         </tbody>
 
     </table>
 {% endblock body %}
-    
+

@@ -2,6 +2,10 @@ from django.urls import path
 from courses.views import *
 
 urlpatterns = [
+    path('edit-enrollment/<int:id>/', edit_enrollment, name='edit_enrollment'),
+    path('delete-enrollment/<int:id>/', delete_enrollment, name='delete_enrollment'),
+    path('edit-assignment/<int:id>/', edit_assignment, name='edit_assignment'),
+    path('delete-assignment/<int:id>/', delete_assignment, name='delete_assignment'),
     #-------Course Category Url
     path('course-category/', course_category_list, name='course_category_list'),
     path('add_category/',add_category, name='add_category'),
