@@ -12,16 +12,32 @@ class StudentForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['user']
     
-    @transaction.atomic  
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk and self.instance.user_id:
+            self.fields['username'].initial = self.instance.user.username
+            self.fields['email'].initial = self.instance.user.email
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        users = UserModel.objects.filter(username=username)
+        if self.instance.user_id:
+            users = users.exclude(pk=self.instance.user_id)
+        if users.exists():
+            raise forms.ValidationError('This username is already in use.')
+        return username
+
+    @transaction.atomic
     def save(self, commit = True):
-        user = UserModel.objects.create_user(
-            username=self.cleaned_data['username'],
-            email=self.cleaned_data['email'],
-            password='123456',
-            user_type = 'Student'
-        )
         student =  super().save(commit=False)
+        user = student.user if student.user_id else UserModel(user_type='Student')
+        user.username = self.cleaned_data['username']
+        user.email = self.cleaned_data['email']
+        if not user.pk:
+            user.set_password('123456')
         student.user = user
         if commit:
+            user.save()
+            student.user = user
             student.save()
         return student

@@ -3,7 +3,7 @@
 {% block title %}
     Teacher List
 {% endblock title %}
-    
+
 
 {% block body %}
     <h1>Teacher List</h1>
@@ -20,7 +20,7 @@
             </tr>
         </thead>
         <tbody>
-            
+
             {% for data in teacher_list %}
             <tr>
                 <td>{{forloop.counter}}</td>
@@ -28,18 +28,20 @@
                 <td>{{data.user.username}}</td>
                 <td>{{data.designation}}</td>
                 <td>
-                    <img src="{{ data.image.url }}" width="50px" alt="">
+                    {% if data.image %}
+                    <img src="{{ data.image.url }}" width="50" alt="{{data.name}}">
+                    {% endif %}
                 </td>
                 <td>
-                    <a href="">Edit</a>
-                    <a href="">Delete</a>
+                    <a href="{% url 'edit_teacher' data.id %}">Edit</a>
+                    <a href="{% url 'delete_teacher' data.id %}">Delete</a>
                 </td>
             </tr>
-                
+
             {% endfor %}
-                
+
         </tbody>
 
     </table>
 {% endblock body %}
-    
+

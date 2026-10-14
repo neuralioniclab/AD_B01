@@ -1,50 +1,25 @@
 {% extends 'master/base.html' %}
-
-{% block title %}
-    Course List
-{% endblock title %}
-    
-
+{% block title %}Course List{% endblock title %}
 {% block body %}
-    <h1>Course List: {{course_count}}</h1>
-    <p>New Data: {{new_data}}</p>
-    {% if request.user.user_type == 'Admin' %}
-    <a href="{% url 'add_course' %}" class="btn btn-success">Add Course</a>
-    {% endif %}
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>SL</th>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Course Fee</th>
-                {% if request.user.user_type == 'Admin' %}
-                <th>Action</th>
-                {% endif %}
-            </tr>
-        </thead>
-        <tbody>
-            
-
-                
-        </tbody>
-
-    </table>
-
-<h1>Prefetch Related</h1>
-<p>{{another_data}}</p>
-
-{% for category in another_data %}
-<h3>{{category.name}}</h3>
-<ul>
-    {% for course in category.course_category.all  %}
-
-        <li>{{course.title}}-{{course.course_fee}}</li>
-    {% endfor %}
-</ul>
-    
-    
-{% endfor %}
-
+<h1>Course List: {{course_count}}</h1>
+{% if request.user.user_type == 'Admin' or request.user.is_superuser %}
+<a href="{% url 'add_course' %}" class="btn btn-success">Add Course</a>
+{% endif %}
+<div class="table-responsive">
+<table class="table table-striped">
+<thead><tr><th>SL</th><th>Title</th><th>Category</th><th>Course Fee</th><th>Action</th></tr></thead>
+<tbody>
+{% for data in course_data %}
+<tr>
+<td>{{forloop.counter}}</td><td>{{data.title}}</td>
+<td>{% for category in data.category.all %}{{category.name}}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</td>
+<td>{{data.course_fee}}</td>
+<td>{% if request.user.user_type == 'Admin' or request.user.is_superuser %}
+<a href="{% url 'edit_course' data.id %}" class="btn btn-primary">Edit</a>
+<a href="{% url 'delete_course' data.id %}" class="btn btn-danger">Delete</a>
+{% endif %}</td>
+</tr>
+{% empty %}<tr><td colspan="5">No courses found.</td></tr>{% endfor %}
+</tbody></table></div>
 {% endblock body %}
-    
+
