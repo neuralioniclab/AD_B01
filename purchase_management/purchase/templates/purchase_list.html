@@ -1,0 +1,54 @@
+{% extends 'master/base.html' %}
+
+{% block title %}
+    Purchase List
+{% endblock title %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Purchase List</h1>
+    <a href="{% url 'purchase_create_view' %}" class="btn btn-success">Add Purchase</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>SL</th>
+            <th>Supplier</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Discount</th>
+            <th>Total</th>
+            <th>Paid</th>
+            <th>Due</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for purchase in purchases %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{purchase.supplier.supplier_name}}</td>
+            <td>{{purchase.product_name}}</td>
+            <td>{{purchase.quantity}}</td>
+            <td>{{purchase.unit_price}}</td>
+            <td>{{purchase.discount}}</td>
+            <td>{{purchase.total_amount}}</td>
+            <td>{{purchase.paid_amount}}</td>
+            <td>{{purchase.due_amount}}</td>
+            <td>{{purchase.purchase_date}}</td>
+            <td>
+                <a href="{% url 'purchase_update_view' purchase.pk %}" class="btn btn-sm btn-primary">Edit</a>
+                <a href="{% url 'purchase_delete_view' purchase.pk %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="11" class="text-center">No purchase found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock body %}

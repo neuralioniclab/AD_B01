@@ -8,6 +8,16 @@
 {% block body %}
     <h1>Student List</h1>
     <a href="{% url 'add_student' %}" class="btn btn-success">Add Student</a>
+    <form method="GET" class="mt-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-auto">
+                <input type="text" name="query" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline">
+            </div>
+            <div class="col-auto">
+               <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </form>
     <table class="table table-striped">
         <thead>
             <tr>

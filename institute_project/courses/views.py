@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Q
 from courses.models import *
 from courses.forms import *
 
@@ -52,9 +53,18 @@ def delete_category(request, id):
     
     
 def course_list(request):
-    course_data = CourseModel.objects.all()
+    # course_data = CourseModel.objects.all()
+    course_data = CourseModel.objects.select_related('category')
+    new_data = CourseModel.objects.filter(title__startswith = 'Ad')
+    
+    another_data = CourseCategoryModel.objects.prefetch_related('course_category')
+    
+    
     context = {
-        'course_data': course_data
+        'course_data': course_data,
+        'new_data': new_data,
+        'course_count': course_data.count(),
+        'another_data': another_data
     }
     
     
@@ -80,6 +90,7 @@ def add_course(request):
     
 def edit_course(request, id):
     data = CourseModel.objects.get(id = id)
+    # data = get_object_or_404(CourseModel, id = id)
     form_data = CourseForm(instance=data)
     if request.method == 'POST':
         form_data = CourseForm(request.POST, request.FILES, instance=data)
@@ -104,7 +115,10 @@ def delete_course(request, id):
 
 def course_enroll_list(request):
     if request.user.user_type == 'Admin':
-        enrolled_data = CourseEnrollmentModel.objects.all()
+        data = CourseEnrollmentModel.objects.all()
+        print(data.count())
+        enrolled_data = CourseEnrollmentModel.objects.prefetch_related('student_courses')
+        
     else:
         
         enrolled_data = CourseEnrollmentModel.objects.filter(student=request.user.student_profile)
@@ -120,8 +134,8 @@ def enroll_new_student(request):
         form_data = EnrollStudentForm(request.POST)
         if form_data.is_valid():
             enroll_from = form_data.save(commit=False)
-            enroll_from.admission_fee = enroll_from.course.course_fee
-            enroll_from.due = enroll_from.course.course_fee - enroll_from.pay
+            # enroll_from.admission_fee = enroll_from.course.course_fee
+            # enroll_from.due = enroll_from.course.course_fee - enroll_from.pay
             enroll_from.save()
             
             return redirect('course_enroll_list')

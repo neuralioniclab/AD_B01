@@ -6,7 +6,8 @@
     
 
 {% block body %}
-    <h1>Course List</h1>
+    <h1>Course List: {{course_count}}</h1>
+    <p>New Data: {{new_data}}</p>
     {% if request.user.user_type == 'Admin' %}
     <a href="{% url 'add_course' %}" class="btn btn-success">Add Course</a>
     {% endif %}
@@ -15,6 +16,8 @@
             <tr>
                 <th>SL</th>
                 <th>Title</th>
+                <th>Category</th>
+                <th>Course Fee</th>
                 {% if request.user.user_type == 'Admin' %}
                 <th>Action</th>
                 {% endif %}
@@ -22,25 +25,26 @@
         </thead>
         <tbody>
             
-            {% for data in course_data %}
-            <tr>
-                <td>{{forloop.counter}}</td>
-                <td>{{data.title}}</td>
-                
-                {% if request.user.user_type == 'Admin' %}
-                <td>
-                    <a href="{% url 'edit_course' data.id %}" class="btn btn-primary">Edit</a>
-                    <a href="{% url 'delete_course' data.id %}" class="btn btn-danger">Delete</a>
-                </td>
-                    
-                {% endif %}
-                    
-            </tr>
-                
-            {% endfor %}
+
                 
         </tbody>
 
     </table>
+
+<h1>Prefetch Related</h1>
+<p>{{another_data}}</p>
+
+{% for category in another_data %}
+<h3>{{category.name}}</h3>
+<ul>
+    {% for course in category.course_category.all  %}
+
+        <li>{{course.title}}-{{course.course_fee}}</li>
+    {% endfor %}
+</ul>
+    
+    
+{% endfor %}
+
 {% endblock body %}
     
