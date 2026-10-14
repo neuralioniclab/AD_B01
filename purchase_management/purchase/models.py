@@ -35,13 +35,7 @@ class Purchase(models.Model):
         return self.product_name
 
     def save(self, *args, **kwargs):
-        gross_amount = self.quantity * self.unit_price
-        self.total_amount = gross_amount - self.discount
-        self.due_amount = self.total_amount - self.paid_amount
-
-        if self.total_amount < Decimal("0.00"):
-            self.total_amount = Decimal("0.00")
-        if self.due_amount < Decimal("0.00"):
-            self.due_amount = Decimal("0.00")
+        self.total_amount = self.calculated_total_amount
+        self.due_amount = self.calculated_due_amount
 
         super().save(*args, **kwargs)

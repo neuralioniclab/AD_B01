@@ -31,21 +31,8 @@ def logout_view(request):
 
 @login_required
 def dashboard_view(request):
-    supplier_purchase_data = Supplier.objects.filter(user=request.user).annotate(
-        total_amount=Sum('purchases__total_amount', default=0),
-        total_due_amount=Sum('purchases__due_amount', default=0)
-    )
-    purchase_summary = Purchase.objects.filter(user=request.user).aggregate(
-        total_amount=Sum('total_amount', default=0),
-        total_paid_amount=Sum('paid_amount', default=0),
-        total_due_amount=Sum('due_amount', default=0)
-    )
-    context = {
-        'supplier_purchase_data': supplier_purchase_data,
-        'purchase_summary': purchase_summary,
-        'total_purchase': Purchase.objects.filter(user=request.user).count()
-    }
-    return render(request, 'dashboard.html', context)
+
+    return render(request, 'dashboard.html')
 
 @login_required
 def supplier_list_view(request):
