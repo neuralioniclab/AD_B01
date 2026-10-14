@@ -5,6 +5,7 @@ from users_auth.models import UserModel
 
 class CourseCategoryModel(models.Model):
     name = models.CharField(max_length=40)
+    # Python, JS
     
     def __str__(self):
         return f'{self.name}'
@@ -12,9 +13,8 @@ class CourseCategoryModel(models.Model):
 class CourseModel(models.Model):
     title = models.CharField(max_length=200,null=True)
     description = models.TextField(null=True)
-    category = models.ForeignKey(
+    category = models.ManyToManyField(
         CourseCategoryModel,
-        on_delete=models.SET_NULL,
         null=True,
         related_name='course_category'
     )
@@ -30,7 +30,7 @@ class CourseModel(models.Model):
 
 class CourseEnrollmentModel(models.Model):
     student = models.ForeignKey(StudentModel, on_delete=models.SET_NULL, null=True, related_name='student_enrollment')
-    course = models.ForeignKey(CourseModel, on_delete=models.CASCADE, null=True)
+    course = models.ManyToManyField(CourseModel, related_name='student_courses')
     admission_fee = models.FloatField(null=True)
     pay = models.FloatField(null=True)
     due = models.FloatField(null=True)

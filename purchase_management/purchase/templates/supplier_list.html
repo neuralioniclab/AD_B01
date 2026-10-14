@@ -1,0 +1,42 @@
+{% extends 'master/base.html' %}
+
+{% block title %}
+    Supplier List
+{% endblock title %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Supplier List</h1>
+    <a href="{% url 'supplier_create_view' %}" class="btn btn-success">Add Supplier</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>SL</th>
+            <th>Name</th>
+            <th>Contact Number</th>
+            <th>Address</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for supplier in suppliers %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{supplier.supplier_name}}</td>
+            <td>{{supplier.contact_number}}</td>
+            <td>{{supplier.address}}</td>
+            <td>
+                <a href="{% url 'supplier_update_view' supplier.pk %}" class="btn btn-sm btn-primary">Edit</a>
+                <a href="{% url 'supplier_delete_view' supplier.pk %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center">No supplier found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock body %}

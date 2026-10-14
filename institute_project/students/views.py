@@ -1,11 +1,20 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from students.models import StudentModel
+from django.db.models import Q
 from students.forms import *
 
 # Create your views here.
 def student_list(request):
     student_list = StudentModel.objects.all()
+    search_value = request.GET.get('query')
+    
+    if search_value:
+        student_list = StudentModel.objects.filter(
+            Q(roll_no__icontains = search_value) |
+            Q(name__icontains = search_value) |
+            Q(user__user_type__icontains = search_value)
+        )
     
     context = {
         'student_list': student_list,

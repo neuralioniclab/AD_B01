@@ -1,0 +1,55 @@
+{% extends 'master/base.html' %}
+
+{% block title %}
+    Dashboard Page
+{% endblock title %}
+
+{% block body %}
+    <h1>Welcome, {{request.user.username}}</h1>
+
+    <h3 class="mt-4">Purchase Summary</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Total Purchase</th>
+                <th>Total Amount</th>
+                <th>Total Paid Amount</th>
+                <th>Total Due Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{total_purchase}}</td>
+                <td>{{purchase_summary.total_amount}}</td>
+                <td>{{purchase_summary.total_paid_amount}}</td>
+                <td>{{purchase_summary.total_due_amount}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3 class="mt-4">Supplier Wise Purchase Summary</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>SL</th>
+                <th>Supplier</th>
+                <th>Total Amount</th>
+                <th>Total Due Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supplier in supplier_purchase_data %}
+            <tr>
+                <td>{{forloop.counter}}</td>
+                <td>{{supplier.supplier_name}}</td>
+                <td>{{supplier.total_amount}}</td>
+                <td>{{supplier.total_due_amount}}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No supplier found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock body %}
