@@ -37,7 +37,7 @@ class CourseEnrollmentModel(models.Model):
     
     
     def __str__(self):
-        return f'{self.student.name}'
+        return (self.student.name or 'Student') if self.student_id else 'Deleted student'
     
     # def save(self, *args, **kwargs):
     #     self.admission_fee = self.course.course_fee
@@ -53,4 +53,6 @@ class AssignTeacherModel(models.Model):
         null=True
     )
     def __str__(self):
-        return f'{self.teacher.name}-{self.course.title}'
+        teacher = self.teacher.name if self.teacher_id else 'Deleted teacher'
+        course = self.course.title if self.course_id else 'Deleted course'
+        return f'{teacher}-{course}'

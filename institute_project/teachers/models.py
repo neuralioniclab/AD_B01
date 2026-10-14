@@ -9,4 +9,4 @@ class TeacherModel(BasicInfoModel):
     image = models.ImageField(upload_to='media/teacher_img', null=True)
 
     def __str__(self):
-        return f'{self.user.username}'
+        return self.name or (self.user.username if self.user_id else 'Teacher')

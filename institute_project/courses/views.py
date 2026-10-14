@@ -1,17 +1,43 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from courses.models import *
 from courses.forms import *
+from users_auth.decorators import admin_required
 
+
+@admin_required
 def course_category_list(request):
-    course_category_data = CourseCategoryModel.objects.all()
-    
-    context = {
-        'course_category_data': course_category_data
-    }
-    
-    return render(request, 'course-category-list.html',context)
+    return render(request, 'course-category-list.html', {
+        'course_category_data': CourseCategoryModel.objects.all(),
+    })
 
+
+@login_required
+def course_list(request):
+    course_data = CourseModel.objects.select_related('created_by').prefetch_related('category')
+    return render(request, 'course-list.html', {
+        'course_data': course_data, 'course_count': course_data.count(),
+    })
+
+
+@login_required
+def course_enroll_list(request):
+    enrolled_data = CourseEnrollmentModel.objects.select_related('student').prefetch_related('course')
+    if request.user.user_type != 'Admin' and not request.user.is_superuser:
+        enrolled_data = enrolled_data.filter(student__user=request.user)
+    return render(request, 'course-enroll-list.html', {'enrolled_data': enrolled_data})
+
+
+@login_required
+def assign_teacher_list(request):
+    assigned_data = AssignTeacherModel.objects.select_related('teacher', 'course')
+    if request.user.user_type != 'Admin' and not request.user.is_superuser:
+        assigned_data = assigned_data.filter(teacher__user=request.user)
+    return render(request, 'assign-teacher-list.html', {'assigned_data': assigned_data})
+
+
+@admin_required
 def add_category(request):
     form_data = CourseCategoryForm()
     if request.method == 'POST':
@@ -19,149 +45,138 @@ def add_category(request):
         if form_data.is_valid():
             form_data.save()
             return redirect('course_category_list')
-    
-    context = {
-        'form_title': 'Add Course Category Information',
-        'form_btn': 'Add Course Category',
+    return render(request, 'master/base-form.html', {
+        'form_title': 'Add Course Category',
         'page_title': 'Add Course Category',
-        'form_data': form_data
-    }
-    return render(request, 'master/base-form.html',context)
+        'form_btn': 'Create',
+        'form_data': form_data,
+    })
 
+
+@admin_required
 def edit_category(request, id):
-    data = CourseCategoryModel.objects.get(id = id)
-    
+    data = get_object_or_404(CourseCategoryModel, pk=id)
     form_data = CourseCategoryForm(instance=data)
     if request.method == 'POST':
         form_data = CourseCategoryForm(request.POST, instance=data)
         if form_data.is_valid():
             form_data.save()
             return redirect('course_category_list')
-    
-    context = {
-        'form_title': 'Edit Course Category Information',
-        'form_btn': 'Edit Course Category',
+    return render(request, 'master/base-form.html', {
+        'form_title': 'Edit Course Category',
         'page_title': 'Edit Course Category',
-        'form_data': form_data
-    }
-    return render(request, 'master/base-form.html',context)
+        'form_btn': 'Update',
+        'form_data': form_data,
+    })
 
 
+@admin_required
 def delete_category(request, id):
-    CourseCategoryModel.objects.get(id = id).delete()
-    return redirect('course_category_list')
-    
-    
-def course_list(request):
-    # course_data = CourseModel.objects.all()
-    course_data = CourseModel.objects.select_related('category')
-    new_data = CourseModel.objects.filter(title__startswith = 'Ad')
-    
-    another_data = CourseCategoryModel.objects.prefetch_related('course_category')
-    
-    
-    context = {
-        'course_data': course_data,
-        'new_data': new_data,
-        'course_count': course_data.count(),
-        'another_data': another_data
-    }
-    
-    
-    return render(request, 'course-list.html',context)
+    data = get_object_or_404(CourseCategoryModel, pk=id)
+    if request.method == 'POST':
+        data.delete()
+        return redirect('course_category_list')
+    return render(request, 'master/confirm-delete.html', {
+        'object': data, 'cancel_url': 'course_category_list',
+    })
 
+
+@admin_required
 def add_course(request):
     form_data = CourseForm()
     if request.method == 'POST':
         form_data = CourseForm(request.POST, request.FILES)
         if form_data.is_valid():
-            course_data = form_data.save(commit=False)
-            course_data.created_by = request.user
-            course_data.save()
+            with transaction.atomic():
+                course_data = form_data.save(commit=False)
+                course_data.created_by = request.user
+                course_data.save()
+                form_data.save_m2m()
             return redirect('course_list')
-    
-    context = {
-        'form_title': 'Add Course Information',
-        'form_btn': 'Add Course',
+    return render(request, 'master/base-form.html', {
+        'form_title': 'Add Course',
         'page_title': 'Add Course',
-        'form_data': form_data
-    }
-    return render(request, 'master/base-form.html',context)
-    
+        'form_btn': 'Create',
+        'form_data': form_data,
+    })
+
+
+@admin_required
 def edit_course(request, id):
-    data = CourseModel.objects.get(id = id)
-    # data = get_object_or_404(CourseModel, id = id)
+    data = get_object_or_404(CourseModel, pk=id)
     form_data = CourseForm(instance=data)
     if request.method == 'POST':
         form_data = CourseForm(request.POST, request.FILES, instance=data)
         if form_data.is_valid():
-            course_data = form_data.save(commit=False)
-            course_data.created_by = request.user
-            course_data.save()
+            with transaction.atomic():
+                course_data = form_data.save(commit=False)
+                course_data.save()
+                form_data.save_m2m()
             return redirect('course_list')
-    
-    context = {
-        'form_title': 'Edit Course Information',
-        'form_btn': 'Edit Course',
+    return render(request, 'master/base-form.html', {
+        'form_title': 'Edit Course',
         'page_title': 'Edit Course',
-        'form_data': form_data
-    }
-    return render(request, 'master/base-form.html',context)
+        'form_btn': 'Update',
+        'form_data': form_data,
+    })
 
+
+@admin_required
 def delete_course(request, id):
-    CourseModel.objects.get(id = id).delete()
-    return redirect('course_list')
+    data = get_object_or_404(CourseModel, pk=id)
+    if request.method == 'POST':
+        data.delete()
+        return redirect('course_list')
+    return render(request, 'master/confirm-delete.html', {
+        'object': data, 'cancel_url': 'course_list',
+    })
 
 
-def course_enroll_list(request):
-    if request.user.user_type == 'Admin':
-        data = CourseEnrollmentModel.objects.all()
-        print(data.count())
-        enrolled_data = CourseEnrollmentModel.objects.prefetch_related('student_courses')
-        
-    else:
-        
-        enrolled_data = CourseEnrollmentModel.objects.filter(student=request.user.student_profile)
-    context = {
-        'enrolled_ata' : enrolled_data
-    }
-    
-    return render(request, 'course-enroll-list.html', context)
-
+@admin_required
 def enroll_new_student(request):
     form_data = EnrollStudentForm()
     if request.method == 'POST':
         form_data = EnrollStudentForm(request.POST)
         if form_data.is_valid():
-            enroll_from = form_data.save(commit=False)
-            # enroll_from.admission_fee = enroll_from.course.course_fee
-            # enroll_from.due = enroll_from.course.course_fee - enroll_from.pay
-            enroll_from.save()
-            
+            form_data.save()
             return redirect('course_enroll_list')
-    
-    context = {
-        'form_title': 'Enroll New Student Info',
-        'form_btn': 'Enroll New Student ',
-        'page_title': 'Enroll New Student',
-        'form_data': form_data
-    }
-    
-    
-    return render(request, 'master/base-form.html', context)
+    return render(request, 'master/base-form.html', {
+        'form_title': 'Add Enrollment',
+        'page_title': 'Add Enrollment',
+        'form_btn': 'Create',
+        'form_data': form_data,
+    })
 
 
-def assign_teacher_list(request):
-    if request.user.user_type == 'Admin':
-        assigned_data = AssignTeacherModel.objects.all()
-    else:
-        assigned_data = AssignTeacherModel.objects.filter(teacher = request.user.teacher_profile)
-    context = {
-        'assigned_data' : assigned_data
-    }
-    
-    return render(request, 'assign-teacher-list.html', context)
+@admin_required
+def edit_enrollment(request, id):
+    data = get_object_or_404(CourseEnrollmentModel, pk=id)
+    form_data = EnrollStudentForm(instance=data)
+    if request.method == 'POST':
+        form_data = EnrollStudentForm(request.POST, instance=data)
+        if form_data.is_valid():
+            form_data.save()
+            return redirect('course_enroll_list')
+    return render(request, 'master/base-form.html', {
+        'form_title': 'Edit Enrollment',
+        'page_title': 'Edit Enrollment',
+        'form_btn': 'Update',
+        'form_data': form_data,
+    })
 
+
+@admin_required
+def delete_enrollment(request, id):
+    data = get_object_or_404(CourseEnrollmentModel, pk=id)
+    if request.method == 'POST':
+        data.delete()
+        return redirect('course_enroll_list')
+    return render(request, 'master/confirm-delete.html', {
+        'object': data, 'cancel_url': 'course_enroll_list',
+    })
+
+
+@admin_required
 def assign_teacher(request):
     form_data = AssignTeacherForm()
     if request.method == 'POST':
@@ -169,13 +184,37 @@ def assign_teacher(request):
         if form_data.is_valid():
             form_data.save()
             return redirect('assign_teacher_list')
-    
-    context = {
-        'form_title': 'Assign Teacher Info',
-        'form_btn': 'Assign Teacher ',
-        'page_title': 'Assign Teacher',
-        'form_data': form_data
-    }
-    
-    
-    return render(request, 'master/base-form.html', context)
+    return render(request, 'master/base-form.html', {
+        'form_title': 'Add Teacher Assignment',
+        'page_title': 'Add Teacher Assignment',
+        'form_btn': 'Create',
+        'form_data': form_data,
+    })
+
+
+@admin_required
+def edit_assignment(request, id):
+    data = get_object_or_404(AssignTeacherModel, pk=id)
+    form_data = AssignTeacherForm(instance=data)
+    if request.method == 'POST':
+        form_data = AssignTeacherForm(request.POST, instance=data)
+        if form_data.is_valid():
+            form_data.save()
+            return redirect('assign_teacher_list')
+    return render(request, 'master/base-form.html', {
+        'form_title': 'Edit Teacher Assignment',
+        'page_title': 'Edit Teacher Assignment',
+        'form_btn': 'Update',
+        'form_data': form_data,
+    })
+
+
+@admin_required
+def delete_assignment(request, id):
+    data = get_object_or_404(AssignTeacherModel, pk=id)
+    if request.method == 'POST':
+        data.delete()
+        return redirect('assign_teacher_list')
+    return render(request, 'master/confirm-delete.html', {
+        'object': data, 'cancel_url': 'assign_teacher_list',
+    })
