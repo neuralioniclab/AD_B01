@@ -3,7 +3,7 @@
 {% block title %}
     Student List
 {% endblock title %}
-    
+
 
 {% block body %}
     <h1>Student List</h1>
@@ -29,25 +29,27 @@
             </tr>
         </thead>
         <tbody>
-            
+
             {% for data in student_list %}
             <tr>
                 <td>{{forloop.counter}}</td>
                 <td>{{data.name}}</td>
                 <td>{{data.roll_no}}</td>
                 <td>
-                    <img src="{{ data.image.url }}" width="50px" alt="">
+                    {% if data.image %}
+                    <img src="{{ data.image.url }}" width="50" alt="{{data.name}}">
+                    {% endif %}
                 </td>
                 <td>
-                    <a href="">Edit</a>
-                    <a href="">Delete</a>
+                    <a href="{% url 'edit_student' data.id %}">Edit</a>
+                    <a href="{% url 'delete_student' data.id %}">Delete</a>
                 </td>
             </tr>
-                
+
             {% endfor %}
-                
+
         </tbody>
 
     </table>
 {% endblock body %}
-    
+
