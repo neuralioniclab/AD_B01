@@ -1,38 +1,25 @@
 {% extends 'master/base.html' %}
-
-{% block title %}
-    Course Enrollment List
-{% endblock title %}
-    
-
+{% block title %}Course Enrollment List{% endblock title %}
 {% block body %}
-    <h1>Course Enrollment List</h1>
-    {% if request.user.user_type == 'Admin' %}
-    <a href="{% url 'enroll_new_student' %}" class="btn btn-success">Enroll New Student</a>
-    {% endif %}
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>SL</th>
-                <th>Student Name</th>
-                <th>Course Name</th>
-                <th>Course Fee</th>
-                <th>Pay</th>
-                <th>Due</th>
-                {% if request.user.user_type == 'Admin' %}
-                <th>Action</th>
-                {% endif %}
-            </tr>
-        </thead>
-        <tbody>
-            
-           
-                
-        </tbody>
-
-    </table>
-
-
-    
+<h1>Course Enrollment List</h1>
+{% if request.user.user_type == 'Admin' or request.user.is_superuser %}
+<a href="{% url 'enroll_new_student' %}" class="btn btn-success">Enroll New Student</a>
+{% endif %}
+<div class="table-responsive">
+<table class="table table-striped">
+<thead><tr><th>SL</th><th>Student</th><th>Courses</th><th>Admission Fee</th><th>Pay</th><th>Due</th><th>Action</th></tr></thead>
+<tbody>
+{% for data in enrolled_data %}
+<tr>
+<td>{{forloop.counter}}</td><td>{{data.student.name|default:"Deleted student"}}</td>
+<td>{% for course in data.course.all %}{{course.title}}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</td>
+<td>{{data.admission_fee|floatformat:2}}</td><td>{{data.pay|floatformat:2}}</td><td>{{data.due|floatformat:2}}</td>
+<td>{% if request.user.user_type == 'Admin' or request.user.is_superuser %}
+<a href="{% url 'edit_enrollment' data.id %}" class="btn btn-primary">Edit</a>
+<a href="{% url 'delete_enrollment' data.id %}" class="btn btn-danger">Delete</a>
+{% endif %}</td>
+</tr>
+{% empty %}<tr><td colspan="7">No enrollments found.</td></tr>{% endfor %}
+</tbody></table></div>
 {% endblock body %}
-    
+

@@ -12,8 +12,8 @@
         <li class="nav-item">
           <a class="nav-link active" aria-current="page" href="{% url 'dashboard_view' %}">Dashbaord</a>
         </li>
-        
-        {% if request.user.user_type == 'Admin' %}
+
+        {% if request.user.user_type == 'Admin' or request.user.is_superuser %}
           <li class="nav-item">
           <a class="nav-link" href="{% url 'student_list' %}">Student</a>
         </li>
@@ -40,13 +40,13 @@
         <li class="nav-item">
           <a class="nav-link" href="{% url 'assign_teacher_list' %}">Assign Teacher</a>
         </li>
-      
-        {% endif %}
-          
 
-          
-        
-       
+        {% endif %}
+
+
+
+
+
         <li class="nav-item">
           <a class="nav-link" href="{% url 'logout_view' %}" tabindex="-1" aria-disabled="true">Logout</a>
         </li>
@@ -54,7 +54,7 @@
         <li class="nav-item">
           <a class="nav-link" href="" tabindex="-1" aria-disabled="true">Login</a>
         </li>
-  
+
         {% endif %}
 
 
